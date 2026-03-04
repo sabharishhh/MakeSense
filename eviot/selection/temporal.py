@@ -22,8 +22,6 @@ def build_temporal_context(
         context, cost_curve = build_context_set_adaptive(
             query_embs=query_embs,
             candidates=segment,
-            epsilon=epsilon,
-            patience=patience,
             k_max=k_max
         )
 
