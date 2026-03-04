@@ -19,4 +19,5 @@ dependencies = [
     "torch>=2.9.1",
     "tqdm>=4.67.1",
     "watchdog>=6.0.0",
+    "en-core-web-sm>=3.8.0"
 ]
