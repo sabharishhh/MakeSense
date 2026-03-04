@@ -1,17 +1,7 @@
+import re
 import torch
-import spacy
-from spacy.cli import download
 import streamlit as st
 from eviot.encoders.encoder import Encoder
-
-
-@st.cache_resource
-def load_spacy():
-    try:
-        return spacy.load("en_core_web_sm")
-    except OSError:
-        download("en_core_web_sm")
-        return spacy.load("en_core_web_sm")
 
 
 @st.cache_resource
@@ -19,8 +9,8 @@ def load_encoder():
     return Encoder()
 
 
-nlp = load_spacy()
 encoder = load_encoder()
+
 
 STOPWORDS = {
     "what", "how", "does", "do", "can", "is", "are",
@@ -37,15 +27,16 @@ def normalize(text: str) -> str:
 
 
 def is_interrogative(text: str) -> bool:
-    return text.split()[0] in INTERROGATIVES
+    tokens = text.split()
+    return tokens and tokens[0] in INTERROGATIVES
 
 
-def content_words(span):
-    return [
-        t.text.lower()
-        for t in span
-        if t.is_alpha and t.text.lower() not in STOPWORDS
-    ]
+def tokenize(text: str):
+    return re.findall(r"[A-Za-z]+", text.lower())
+
+
+def generate_ngrams(tokens, n):
+    return [" ".join(tokens[i:i+n]) for i in range(len(tokens) - n + 1)]
 
 
 def suppress_subphrases(phrases):
@@ -64,24 +55,31 @@ def suppress_subphrases(phrases):
 
 
 def extract_phrases(query: str, max_phrases: int = 10):
-    doc = nlp(query)
-    query_tokens = {t.text.lower() for t in doc if t.is_alpha}
+
+    tokens = tokenize(query)
+
+    query_tokens = set(tokens)
+
     candidates = []
 
-    for chunk in doc.noun_chunks:
-        if len(content_words(chunk)) >= 2:
-            candidates.append(chunk.text)
+    # unigram candidates
+    for t in tokens:
+        if t not in STOPWORDS:
+            candidates.append(t)
 
-    for token in doc:
-        if token.pos_ in {"NOUN", "PROPN"} and token.text.lower() not in STOPWORDS:
-            candidates.append(token.text)
+    # bigram candidates
+    for bg in generate_ngrams(tokens, 2):
+        words = bg.split()
+        if all(w not in STOPWORDS for w in words):
+            candidates.append(bg)
 
-    for token in doc:
-        if token.pos_ == "VERB":
-            span = doc[token.left_edge.i: token.right_edge.i + 1]
-            if len(content_words(span)) >= 2:
-                candidates.append(span.text)
+    # trigram candidates
+    for tg in generate_ngrams(tokens, 3):
+        words = tg.split()
+        if sum(w not in STOPWORDS for w in words) >= 2:
+            candidates.append(tg)
 
+    # remove duplicates while preserving order
     seen = set()
     candidates = [
         normalize(c) for c in candidates
@@ -90,16 +88,21 @@ def extract_phrases(query: str, max_phrases: int = 10):
 
     filtered = []
     for c in candidates:
+
         if is_interrogative(c):
             continue
+
         overlap = len(set(c.split()) & query_tokens) / max(len(query_tokens), 1)
+
         if overlap < 0.7:
             filtered.append(c)
 
     if not filtered:
-        filtered = [t.text.lower() for t in doc if t.is_alpha]
+        filtered = tokens
 
+    # embed phrases
     embs = encoder.encode(filtered)
+
     keep = []
 
     for i, e in enumerate(embs):
@@ -107,5 +110,7 @@ def extract_phrases(query: str, max_phrases: int = 10):
             keep.append(i)
 
     phrases = suppress_subphrases([filtered[i] for i in keep])
+
     phrases = phrases[:max_phrases]
+
     return phrases, encoder.encode(phrases)
