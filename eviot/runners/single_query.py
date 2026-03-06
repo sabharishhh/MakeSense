@@ -5,11 +5,6 @@ from eviot.selection.set_builder import build_context_set_fixed
 from eviot.selection.adaptive import build_context_set_adaptive
 from eviot.selection.temporal import build_temporal_context
 
-
-# =========================================================
-# CONFIG
-# =========================================================
-
 CONFIG = {
 
     "mode": "adaptive",
@@ -29,30 +24,13 @@ CONFIG = {
     "alpha_temporal": 0.3,
 }
 
-
 encoder = Encoder()
 
-
-# =========================================================
-# MAIN PIPELINE
-# =========================================================
-
 def run_context_construction(query, candidate_texts):
-
-
-    # ------------------------------------------------
-    # Query embeddings
-    # ------------------------------------------------
-
     if CONFIG["use_query_decomposition"]:
         _, q_embs = extract_phrases(query)
     else:
         q_embs = encoder.encode(query)
-
-
-    # ------------------------------------------------
-    # Candidate embeddings (vectorized for speed)
-    # ------------------------------------------------
 
     cand_embs = encoder.encode(candidate_texts)
 
@@ -64,13 +42,7 @@ def run_context_construction(query, candidate_texts):
         for t, e in zip(candidate_texts, cand_embs)
     ]
 
-
     mode = CONFIG["mode"]
-
-
-# =========================================================
-# FIXED MODE
-# =========================================================
 
     if mode == "fixed":
 
@@ -85,11 +57,6 @@ def run_context_construction(query, candidate_texts):
             "context": selected,
             "cost_curve": cost_curve
         }
-
-
-# =========================================================
-# ADAPTIVE MODE
-# =========================================================
 
     if mode == "adaptive":
 
@@ -107,11 +74,6 @@ def run_context_construction(query, candidate_texts):
             "cost_curve": cost_curve
         }
 
-
-# =========================================================
-# TEMPORAL MODE
-# =========================================================
-
     if mode == "temporal":
 
         states = build_temporal_context(
@@ -128,10 +90,5 @@ def run_context_construction(query, candidate_texts):
             "mode": "temporal",
             "states": states
         }
-
-
-# =========================================================
-# ERROR
-# =========================================================
 
     raise ValueError(f"Unknown mode: {mode}")

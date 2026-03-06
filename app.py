@@ -4,12 +4,8 @@ import altair as alt
 import torch
 
 from eviot.runners.single_query import run_context_construction, CONFIG
-from eviot.query.decompose import extract_phrases
+from eviot.query.decompose_spacy import extract_phrases
 
-
-# ------------------------------------------------
-# Page configuration
-# ------------------------------------------------
 
 st.set_page_config(
     page_title="MakeSense – Context Construction",
@@ -20,10 +16,6 @@ st.set_page_config(
 st.title("MakeSense")
 st.caption("Optimal Transport based semantic coverage retrieval")
 
-
-# ------------------------------------------------
-# UI inputs
-# ------------------------------------------------
 
 query = st.text_area(
     "Query",
@@ -65,10 +57,6 @@ if CONFIG["mode"] == "fixed":
 run = st.button("Build Context")
 
 
-# ------------------------------------------------
-# Execution
-# ------------------------------------------------
-
 if run:
 
     if not query or not candidates_input:
@@ -87,10 +75,6 @@ if run:
     st.divider()
     st.subheader("Selected Context")
 
-
-# =========================================================
-# TEMPORAL MODE
-# =========================================================
 
     if output["mode"] == "temporal":
 
@@ -136,11 +120,6 @@ if run:
             "temporal cost enforces consistency between context states."
         )
 
-
-# =========================================================
-# FIXED / ADAPTIVE MODE
-# =========================================================
-
     else:
 
         context = output["context"]
@@ -177,11 +156,6 @@ if run:
             st.caption(
                 "Coverage gain shows diminishing returns as more evidence is added."
             )
-
-
-        # ------------------------------------------------
-        # Adaptive stopping visualization
-        # ------------------------------------------------
 
         if CONFIG["mode"] == "adaptive":
 
@@ -240,11 +214,6 @@ if run:
         st.success(
             f"Final OT Cost: {cost_curve[-1]:.4f}"
         )
-
-
-        # ------------------------------------------------
-        # Query–Evidence Alignment Heatmap (NEW)
-        # ------------------------------------------------
 
         if CONFIG["mode"] in ["adaptive", "fixed"]:
 

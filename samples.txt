@@ -9,3 +9,18 @@ Advances in blood glucose monitoring have improved diabetes management over time
 Diabetes mellitus is a chronic metabolic disorder characterized by high blood sugar levels.
 Charles Best later became a prominent professor of physiology.
 Insulin therapy requires careful dosage to avoid hypoglycemia.
+
+How does Bitcoin achieve decentralized consensus and who introduced the system?
+
+Bitcoin is a digital currency that operates without a central authority.
+The system was introduced in 2008 by an anonymous individual or group using the name Satoshi Nakamoto.
+Bitcoin transactions are recorded on a public distributed ledger called the blockchain.
+The blockchain is maintained by a network of nodes that validate transactions.
+Bitcoin uses a mechanism called proof-of-work to achieve decentralized consensus.
+In proof-of-work, miners compete to solve cryptographic puzzles to add new blocks.
+The miner who solves the puzzle first broadcasts the block to the network for verification.
+Once validated, the block becomes part of the permanent blockchain history.
+Bitcoin mining consumes significant computational power and electricity.
+Some governments have introduced regulations governing cryptocurrency exchanges.
+Bitcoin is often compared to digital gold because of its limited supply.
+The total supply of Bitcoin is capped at 21 million coins.

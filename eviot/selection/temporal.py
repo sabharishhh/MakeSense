@@ -3,7 +3,6 @@ from eviot.selection.adaptive import build_context_set_adaptive
 from eviot.ot.cost import ot_cost
 import torch
 
-
 def build_temporal_context(
     query_embs,
     candidates,

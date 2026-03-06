@@ -4,8 +4,6 @@ from eviot.query.decompose import extract_phrases
 from eviot.ot.cost import ot_cost
 from eviot.encoders.encoder import Encoder
 
-# Config
-
 USE_QUERY_DECOMPOSITION = False
 
 

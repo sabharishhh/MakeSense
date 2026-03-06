@@ -3,14 +3,11 @@ import torch
 import streamlit as st
 from eviot.encoders.encoder import Encoder
 
-
 @st.cache_resource
 def load_encoder():
     return Encoder()
 
-
 encoder = load_encoder()
-
 
 STOPWORDS = {
     "what", "how", "does", "do", "can", "is", "are",
@@ -21,7 +18,6 @@ INTERROGATIVES = {
     "what", "how", "does", "do", "can", "is", "are"
 }
 
-
 def normalize(text: str) -> str:
     return text.lower().strip()
 
@@ -30,14 +26,11 @@ def is_interrogative(text: str) -> bool:
     tokens = text.split()
     return tokens and tokens[0] in INTERROGATIVES
 
-
 def tokenize(text: str):
     return re.findall(r"[A-Za-z]+", text.lower())
 
-
 def generate_ngrams(tokens, n):
     return [" ".join(tokens[i:i+n]) for i in range(len(tokens) - n + 1)]
-
 
 def suppress_subphrases(phrases):
     final = []
@@ -62,24 +55,20 @@ def extract_phrases(query: str, max_phrases: int = 10):
 
     candidates = []
 
-    # unigram candidates
     for t in tokens:
         if t not in STOPWORDS:
             candidates.append(t)
 
-    # bigram candidates
     for bg in generate_ngrams(tokens, 2):
         words = bg.split()
         if all(w not in STOPWORDS for w in words):
             candidates.append(bg)
 
-    # trigram candidates
     for tg in generate_ngrams(tokens, 3):
         words = tg.split()
         if sum(w not in STOPWORDS for w in words) >= 2:
             candidates.append(tg)
 
-    # remove duplicates while preserving order
     seen = set()
     candidates = [
         normalize(c) for c in candidates
@@ -100,7 +89,6 @@ def extract_phrases(query: str, max_phrases: int = 10):
     if not filtered:
         filtered = tokens
 
-    # embed phrases
     embs = encoder.encode(filtered)
 
     keep = []
@@ -110,7 +98,6 @@ def extract_phrases(query: str, max_phrases: int = 10):
             keep.append(i)
 
     phrases = suppress_subphrases([filtered[i] for i in keep])
-
     phrases = phrases[:max_phrases]
 
     return phrases, encoder.encode(phrases)
